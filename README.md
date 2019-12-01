@@ -1,0 +1,2 @@
+# HMM_for_command_recognization
+GaussianHMM for command recognization
