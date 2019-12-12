@@ -7,6 +7,7 @@ import wave
 import os
 from get_mfc_data import get_mfc_data
 from GaussianHMM import GaussianHMM
+import time
 
 
 def open_file_mfc(filename):
@@ -159,7 +160,7 @@ def cut_sound(raw_data, file_en_path, file_zero_path):
     #print("min zero rate: {}".format(zero_min))
     #print("max zero rate: {}".format(zero_max))
     #选择性写入语音片段
-    zero_min = 0.25
+    zero_min = 0.2
     #en_min = en_min+en_max*0.001
     en_min = 1000000
     #print("stage energy: {}".format(en_min))
@@ -275,6 +276,8 @@ if __name__ == '__main__':
         
         order = "hcopy.exe -A -D -T 1 -C tr_wav.cfg -S list.scp"
         r_v = os.popen(order) #执行命令行
+        
+        time.sleep(0.1)
         
         test_sample = open_file_mfc('./temp_sound/input_mfcc.mfc')
         
