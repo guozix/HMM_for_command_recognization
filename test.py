@@ -6,7 +6,7 @@ if __name__ == "__main__":
     #datas = get_mfc_data('C:/Users/18341/Desktop/book/听觉/实验3-语音识别/语料/features/')
     datas = get_mfc_data('F:/HIT/大三上/视听觉/lab3/组/gzx_sound_mfcc/')
     
-    # 每个类别创建一个hmm, 并用kmeans初始化hmm
+    # 每个类别创建一个hmm, 并用kmeans,viterbi初始化hmm
     hmms = dict()
     for category in datas:
         Qs = datas[category]
@@ -51,6 +51,7 @@ if __name__ == "__main__":
     print(correct_num / (3*5))
     
     #输出参数
+    '''
     print("params:\n")
     print(hmms['1'].initial_prob)
     print(hmms['1'].transition_prob)
@@ -66,5 +67,5 @@ if __name__ == "__main__":
     print('-------------')
     print(hmms['5'].initial_prob)
     print(hmms['5'].transition_prob)
-    
+    '''
   

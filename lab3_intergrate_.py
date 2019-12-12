@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 18 15:11:51 2019
-"""
 
 import pyaudio
 import numpy as np
 import struct
 import wave
 import os
-from hmmlearn import hmm
 from get_mfc_data import get_mfc_data
+from GaussianHMM import GaussianHMM
+
 
 def open_file_mfc(filename):
-    #输入文件名
-    #返回
     '''
     读取mfcc文件，返回二维数组，表示每个时间点的mfcc向量
     '''
@@ -214,47 +210,31 @@ if __name__ == '__main__':
     #训练
     #datas = get_mfc_data('C:/Users/18341/Desktop/book/听觉/实验3-语音识别/语料/features/')
     datas = get_mfc_data('F:/HIT/大三上/视听觉/lab3/组/gzx_sound_mfcc/')
-    
 
-    #model = hmm.GaussianHMM(n_components = 5, n_iter = 20, tol = 0.01, covariance_type="diag")
-
+    # 每个类别创建一个hmm, 并用kmeans,viterbi初始化hmm
     hmms = dict()
-    
     for category in datas:
         Qs = datas[category]
-        n_hidden = 6
-        model = hmm.GaussianHMM(n_components = 5, n_iter = 20, tol = 0.01, covariance_type="diag")
-        vstack_Qs = np.vstack(tuple(Qs[:-3]))
-        #print(tuple(Qs[:-3]))
-        #print('----------')
-        #print([Q.shape[0] for Q in Qs[:-3]])
-        #print('-++++++++++++')
-        model.fit(vstack_Qs, [Q.shape[0] for Q in Qs[:-3]])
-        print('success fit')
-        hmms[category] = model
-        
-    '''
-    #test
-    correct_num = 0
-    for category in datas:
-        for test_sample in datas[category][-3:]:
-            print('real_category:', category)
-            max_score = -1 * np.inf
-            predict = -1
-            for predict_category in hmms:
-                model = hmms[predict_category]
-                score = model.score(test_sample)
-                print('category', predict_category, '. score:', score)
-                if score > max_score:
-                    max_score = score
-                    predict = predict_category
-                    #print('predict_category', predict_category)
-            if predict == category:
-                correct_num += 1
-            print('predict_category:',predict)
-    print(correct_num / (3*5))
-    '''
+        n_hidden = 5     
+        n_dim = Qs[0].shape[1]
+
+        hmm = GaussianHMM(n_hidden,n_dim)
+        hmm.kmeans_init(Qs[:-3])
+        hmm.viterbi_init(Qs) #
+        hmms[category] = hmm
+    
+    # 训练每个hmm
+    print('start fit')
+    for category in hmms:
+        hmm = hmms[category]
+        #print(hmm.covs)
+        Qs = datas[category]
+        hmm.fit(Qs[:-3], iter_max = 5)
+        hmms[category] = hmm
+        print(category, ':fit success')
+
     while(True):
+        # 语音识别系统开始运行
         # 麦克风采集的语音输入
         input_filename = "input.wav"               
         input_filepath = './temp_sound/'
@@ -303,7 +283,7 @@ if __name__ == '__main__':
         predict = -1
         for predict_category in hmms:
             model = hmms[predict_category]
-            score = model.score(test_sample)
+            score = model.generate_prob(test_sample)
             print('category', predict_category, '. score:', score)
             if score > max_score:
                 max_score = score
@@ -311,7 +291,3 @@ if __name__ == '__main__':
                 #print('predict_category', predict_category)
         print('predict_category:',predict)
         print(order_text[int(predict)-1])
-    
-    
-    
-    
